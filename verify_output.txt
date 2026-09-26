@@ -1,0 +1,117 @@
+OpenClaw verification 
+==================== 
+ 
+Python 3.13.14
+ 
+--- pip install --- 
+Defaulting to user installation because normal site-packages is not writeable
+Requirement already satisfied: requests>=2.31 in C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages (from -r requirements.txt (line 1)) (2.33.1)
+Requirement already satisfied: pypdf>=4.0 in C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages (from -r requirements.txt (line 2)) (6.10.2)
+Collecting yfinance>=0.2.40 (from -r requirements.txt (line 3))
+  Downloading yfinance-1.7.0-py3-none-any.whl.metadata (6.7 kB)
+Collecting pandas>=2.0 (from -r requirements.txt (line 4))
+  Downloading pandas-3.0.5-cp313-cp313-win_amd64.whl.metadata (19 kB)
+Requirement already satisfied: charset_normalizer<4,>=2 in C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages (from requests>=2.31->-r requirements.txt (line 1)) (3.4.7)
+Requirement already satisfied: idna<4,>=2.5 in C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages (from requests>=2.31->-r requirements.txt (line 1)) (3.11)
+Requirement already satisfied: urllib3<3,>=1.26 in C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages (from requests>=2.31->-r requirements.txt (line 1)) (2.6.3)
+Requirement already satisfied: certifi>=2023.5.7 in C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages (from requests>=2.31->-r requirements.txt (line 1)) (2026.2.25)
+Collecting beautifulsoup4>=4.11.1 (from yfinance>=0.2.40->-r requirements.txt (line 3))
+  Downloading beautifulsoup4-4.15.0-py3-none-any.whl.metadata (3.8 kB)
+Requirement already satisfied: curl_cffi>=0.15 in C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages (from yfinance>=0.2.40->-r requirements.txt (line 3)) (0.15.0)
+Collecting lxml>=4.9.0 (from yfinance>=0.2.40->-r requirements.txt (line 3))
+  Downloading lxml-6.1.2-cp313-cp313-win_amd64.whl.metadata (3.4 kB)
+Collecting multitasking>=0.0.7 (from yfinance>=0.2.40->-r requirements.txt (line 3))
+  Downloading multitasking-0.0.13-py3-none-any.whl.metadata (16 kB)
+Collecting numpy>=1.16.5 (from yfinance>=0.2.40->-r requirements.txt (line 3))
+  Downloading numpy-2.5.2-cp313-cp313-win_amd64.whl.metadata (6.6 kB)
+Collecting peewee>=3.16.2 (from yfinance>=0.2.40->-r requirements.txt (line 3))
+  Downloading peewee-4.4.0-py3-none-any.whl.metadata (10 kB)
+Collecting platformdirs>=2.0.0 (from yfinance>=0.2.40->-r requirements.txt (line 3))
+  Downloading platformdirs-4.11.5-py3-none-any.whl.metadata (5.5 kB)
+Collecting protobuf>=3.19.0 (from yfinance>=0.2.40->-r requirements.txt (line 3))
+  Downloading protobuf-7.36.0-cp310-abi3-win_amd64.whl.metadata (595 bytes)
+Collecting pytz>=2022.5 (from yfinance>=0.2.40->-r requirements.txt (line 3))
+  Downloading pytz-2026.3.post1-py2.py3-none-any.whl.metadata (22 kB)
+Collecting websockets>=13.0 (from yfinance>=0.2.40->-r requirements.txt (line 3))
+  Downloading websockets-17.1-cp313-cp313-win_amd64.whl.metadata (6.5 kB)
+Collecting python-dateutil>=2.8.2 (from pandas>=2.0->-r requirements.txt (line 4))
+  Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+Collecting tzdata (from pandas>=2.0->-r requirements.txt (line 4))
+  Downloading tzdata-2026.3-py2.py3-none-any.whl.metadata (1.4 kB)
+Collecting soupsieve>=1.6.1 (from beautifulsoup4>=4.11.1->yfinance>=0.2.40->-r requirements.txt (line 3))
+  Downloading soupsieve-2.9.2-py3-none-any.whl.metadata (4.6 kB)
+Collecting typing-extensions>=4.0.0 (from beautifulsoup4>=4.11.1->yfinance>=0.2.40->-r requirements.txt (line 3))
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Requirement already satisfied: cffi>=2.0.0 in C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages (from curl_cffi>=0.15->yfinance>=0.2.40->-r requirements.txt (line 3)) (2.0.0)
+Requirement already satisfied: rich in C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages (from curl_cffi>=0.15->yfinance>=0.2.40->-r requirements.txt (line 3)) (15.0.0)
+Requirement already satisfied: pycparser in C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages (from cffi>=2.0.0->curl_cffi>=0.15->yfinance>=0.2.40->-r requirements.txt (line 3)) (3.0)
+Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas>=2.0->-r requirements.txt (line 4))
+  Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Requirement already satisfied: markdown-it-py>=2.2.0 in C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages (from rich->curl_cffi>=0.15->yfinance>=0.2.40->-r requirements.txt (line 3)) (4.0.0)
+Requirement already satisfied: pygments<3.0.0,>=2.13.0 in C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages (from rich->curl_cffi>=0.15->yfinance>=0.2.40->-r requirements.txt (line 3)) (2.20.0)
+Requirement already satisfied: mdurl~=0.1 in C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages (from markdown-it-py>=2.2.0->rich->curl_cffi>=0.15->yfinance>=0.2.40->-r requirements.txt (line 3)) (0.1.2)
+Downloading yfinance-1.7.0-py3-none-any.whl (149 kB)
+Downloading pandas-3.0.5-cp313-cp313-win_amd64.whl (9.8 MB)
+   ---------------------------------------- 9.8/9.8 MB 3.2 MB/s  0:00:03
+Downloading beautifulsoup4-4.15.0-py3-none-any.whl (109 kB)
+Downloading lxml-6.1.2-cp313-cp313-win_amd64.whl (4.0 MB)
+   ---------------------------------------- 4.0/4.0 MB 3.0 MB/s  0:00:01
+Downloading multitasking-0.0.13-py3-none-any.whl (16 kB)
+Downloading numpy-2.5.2-cp313-cp313-win_amd64.whl (12.5 MB)
+   ---------------------------------------- 12.5/12.5 MB 3.2 MB/s  0:00:03
+Downloading peewee-4.4.0-py3-none-any.whl (191 kB)
+Downloading platformdirs-4.11.5-py3-none-any.whl (23 kB)
+Downloading protobuf-7.36.0-cp310-abi3-win_amd64.whl (453 kB)
+Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Downloading pytz-2026.3.post1-py2.py3-none-any.whl (508 kB)
+Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+Downloading soupsieve-2.9.2-py3-none-any.whl (37 kB)
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading websockets-17.1-cp313-cp313-win_amd64.whl (217 kB)
+Downloading tzdata-2026.3-py2.py3-none-any.whl (348 kB)
+Installing collected packages: pytz, multitasking, websockets, tzdata, typing-extensions, soupsieve, six, protobuf, platformdirs, peewee, numpy, lxml, python-dateutil, beautifulsoup4, pandas, yfinance
+  WARNING: The script websockets.exe is installed in 'C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\Scripts' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The scripts pwiz.exe and pwmigrate.exe are installed in 'C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\Scripts' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The scripts f2py.exe and numpy-config.exe are installed in 'C:\Users\yboti\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\Scripts' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+
+Successfully installed beautifulsoup4-4.15.0 lxml-6.1.2 multitasking-0.0.13 numpy-2.5.2 pandas-3.0.5 peewee-4.4.0 platformdirs-4.11.5 protobuf-7.36.0 python-dateutil-2.9.0.post0 pytz-2026.3.post1 six-1.17.0 soupsieve-2.9.2 typing-extensions-4.16.0 tzdata-2026.3 websockets-17.1 yfinance-1.7.0
+
+[notice] A new release of pip is available: 26.1.2 -> 26.2.1
+[notice] To update, run: C:\Users\yboti\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\python.exe -m pip install --upgrade pip
+ 
+--- selftest --- 
+======================================================================
+OpenClaw self-test
+======================================================================
+
+-- offline logic --
+[ ok ] market-state classification  -  6 timestamps mapped correctly
+2026-08-30 01:29:30 INFO    openclaw.filter: ABC body unavailable (no_extractable_text) - passing with flag
+[ ok ] pre-filter rules  -  12 cases correct
+[ ok ] slippage tiers  -  3% sub-$50m, 1.5% $50-100m
+[ ok ] bar finality guard  -  past bars settled, future bars refused
+[ ok ] sqlite persistence and dedup  -  scratch db at C:\Users\yboti\AppData\Local\Temp\openclaw_selftest_ras7xhsy\selftest.sqlite
+2026-08-30 01:29:30 INFO    openclaw.shadow: ENTERED ZZZ  2026-03-02 open @ 1.0000 (net 1.0300 after 3.0% haircut)
+2026-08-30 01:29:30 INFO    openclaw.shadow: CLOSED  ZZZ t+1   +3.59%  ($+179.61)  excess +3.59%
+2026-08-30 01:29:30 INFO    openclaw.shadow: CLOSED  ZZZ t+5   +51.67%  ($+2583.47)  excess +51.67%
+2026-08-30 01:29:30 INFO    openclaw.shadow: CLOSED  ZZZ t+20  +533.56%  ($+26678.03)  excess +533.56%
+[ ok ] end-to-end ledger arithmetic  -  entry, both haircuts, 3 horizons, benchmark excess
+
+-- live services --
+[ ok ] ASX feed reachable  -  50 items, newest: ZOR End of Day
+[ ok ] PDF text extraction  -  252 chars from ZOR
+HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ZOR.AX"}}}
+[FAIL] market cap lookup  -  ZOR returned nothing - every announcement will be rejected as mcap_unknown
+$ZOR.AX: possibly delisted; no timezone found
+[FAIL] daily bars  -  no price history for ZOR
+[ ok ] benchmark index  -  ^AXSO, 14 sessions
+[ ok ] filter over live feed  -  5/50 would pass on headline+flag alone  (not_price_sensitive=34, not_ordinary_shares=7, ok=5, headline_excluded=2, no_category_match=2)
+
+======================================================================
+FAILED: 2 check(s) -> market cap lookup, daily bars
+Do not leave it running until these are fixed.
+scratch dir: C:\Users\yboti\AppData\Local\Temp\openclaw_selftest_ras7xhsy
+======================================================================
