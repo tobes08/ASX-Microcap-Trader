@@ -1,0 +1,23 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Runtime databases and SQLite sidecar files
+data/*.sqlite
+data/*.sqlite-*
+*.db
+
+# Runtime output
+data/raw/
+data/logs/
+
+# Local editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

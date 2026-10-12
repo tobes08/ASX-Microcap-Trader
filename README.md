@@ -1,4 +1,6 @@
-# OpenClaw
+# ASX-Microcap-Trader
+
+## OpenClaw
 
 ASX announcement poller, rule-based pre-filter, and a forward-only paper
 simulation. One process, meant to be left running for weeks.
