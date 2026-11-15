@@ -16,6 +16,10 @@ data/*.sqlite-*
 data/raw/
 data/logs/
 
+# Research corpus, price cache and event-study output (Sprint 0.2).
+# Private, personal use only: never commit harvested announcements.
+data/research/
+
 # Local editor and OS files
 .vscode/
 .idea/

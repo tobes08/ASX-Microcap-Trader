@@ -208,3 +208,82 @@ MARKET_CAP_TTL_DAYS = 7
 # Give up on a trade whose entry bar never materialises (delisting, prolonged
 # suspension). Recorded as VOID, not as a loss.
 ENTRY_RESOLUTION_MAX_DAYS = 10
+
+# --------------------------------------------------------------------------
+# Research (Sprint 0.2): historical harvest and event study
+# --------------------------------------------------------------------------
+# Everything research-side lives in its own directory and its own database,
+# so nothing here can touch the live shadow-book ledger. Both are gitignored:
+# the corpus is for private, personal use and must never be committed.
+RESEARCH_DIR = os.path.join(DATA_DIR, "research")
+HISTORY_DB_PATH = os.path.join(RESEARCH_DIR, "history.sqlite")
+
+# The feed serves at most this many items per query however it is paged
+# (probed 15 Nov 2026: page 5 of 2000 comes back empty with count=0). History
+# is therefore reached with date windows, each small enough to sit under it.
+FEED_MAX_RESULT_WINDOW = 10_000
+HARVEST_ITEMS_PER_PAGE = 2000
+# Window length in days. A window that hits the cap is split automatically.
+HARVEST_WINDOW_DAYS = 7           # every announcement
+HARVEST_WINDOW_DAYS_PS = 28       # price-sensitive only
+# Minimum gap between harvest requests. The endpoint is unofficial and has no
+# contract behind it. A year of history is ~100 requests, so there is nothing
+# to gain from going faster and an endpoint to lose.
+HARVEST_MIN_INTERVAL = 2.5        # seconds
+
+# Price history for the event study. Extra calendar days fetched before the
+# first event (market cap needs prior closes) and after the last (exits).
+STUDY_PRICE_PAD_BEFORE_DAYS = 20
+STUDY_PRICE_WORKERS = 3           # concurrent Yahoo requests, keep it gentle
+# A cached series is reused when it falls this many days short of the end of
+# the range asked for. The study asks for prices up to "yesterday", which
+# moves every day, so an exact-cover rule would throw the whole cache away
+# each morning (found the hard way: 1,900 tickers re-downloaded). Beyond the
+# slack the series is fetched again, because Yahoo restates adjusted prices
+# whenever a dividend goes ex, so tails cannot be safely appended.
+STUDY_PRICE_CACHE_SLACK_DAYS = 7
+# Market cap at announcement time is the median of this many prior sessions
+# of (shares on issue x close), which shrugs off a one-day data glitch.
+STUDY_MCAP_LOOKBACK_SESSIONS = 5
+
+# Liquidity as known at decision time: the median daily turnover (AUD) over
+# this many sessions strictly before the entry session. Looking at the entry
+# session itself would let the announcement's own volume pick the sample.
+LIQUIDITY_LOOKBACK_SESSIONS = 20
+LIQUIDITY_MIN_SESSIONS = 5
+LIQUIDITY_BANDS = [
+    (10_000, "under $10k a day"),
+    (50_000, "$10k - $50k"),
+    (250_000, "$50k - $250k"),
+    (1_000_000, "$250k - $1m"),
+    (float("inf"), "over $1m a day"),
+]
+
+# Placebo control: for every real trade, this many virtual trades in the same
+# stock on pre-open mornings drawn from the same season. Fixed seed, so the
+# report is reproducible run to run.
+STUDY_PLACEBO_DRAWS = 3
+STUDY_PLACEBO_SEED = 7
+# A placebo morning must be more than EXCLUDE days from any real announcement
+# in that stock: longer than the longest horizon (20 sessions, about 28
+# calendar days), so its holding window cannot overlap the real reaction and
+# it cannot sit in the post-announcement drift. It is drawn from within
+# WINDOW days, so it comes from the same season: micro-cap performance against
+# the index swings with reporting seasons, and real announcements cluster in
+# them.
+STUDY_PLACEBO_EXCLUDE_DAYS = 30
+STUDY_PLACEBO_WINDOW_DAYS = 90
+
+# The Sprint 0.2.6 gate, as written in the plan.
+GATE_MIN_N = 30
+# Cells smaller than this are printed but flagged as anecdote.
+STUDY_MIN_N_TO_REPORT = 10
+
+# ASX minimum price steps, as (price_below, tick). Used only by the event
+# study's cost stress test: on a 0.7c stock one tick is 14% of the price, so
+# a flat percentage haircut understates what crossing the spread costs.
+ASX_TICK_SIZES = [
+    (0.10, 0.001),
+    (2.00, 0.005),
+    (float("inf"), 0.01),
+]

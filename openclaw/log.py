@@ -15,7 +15,13 @@ from . import config
 _configured = False
 
 
-def setup(verbose=True):
+def setup(verbose=True, filename="openclaw.log"):
+    """Configure logging once per process. The first call wins.
+
+    The research tools (harvest, event study) pass their own filename so they
+    never hold the live poller's log open: on Windows a second process with
+    the file open blocks the poller's log rotation.
+    """
     global _configured
     if _configured:
         return logging.getLogger("openclaw")
@@ -30,7 +36,7 @@ def setup(verbose=True):
         datefmt="%Y-%m-%d %H:%M:%S")
 
     fh = RotatingFileHandler(
-        os.path.join(config.LOG_DIR, "openclaw.log"),
+        os.path.join(config.LOG_DIR, filename),
         maxBytes=5 * 1024 * 1024, backupCount=5, encoding="utf-8")
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(fmt)

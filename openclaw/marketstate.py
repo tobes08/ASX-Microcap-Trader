@@ -32,7 +32,18 @@ CONTINUOUS_END = time(16, 0)
 CLOSE_AUCTION_END = time(16, 12)
 
 # ASX observed non-trading weekdays. Extend as new calendars are published.
+# 2024 and 2025 are here for the historical event study, which classifies old
+# announcements with this same function. Every date up to 13 Nov 2026 was
+# checked against the sessions that actually have price bars.
 HOLIDAYS = {
+    # 2024
+    date(2024, 1, 1), date(2024, 1, 26), date(2024, 3, 29), date(2024, 4, 1),
+    date(2024, 4, 25), date(2024, 6, 10), date(2024, 12, 25),
+    date(2024, 12, 26),
+    # 2025
+    date(2025, 1, 1), date(2025, 1, 27), date(2025, 4, 18), date(2025, 4, 21),
+    date(2025, 4, 25), date(2025, 6, 9), date(2025, 12, 25),
+    date(2025, 12, 26),
     # 2026
     date(2026, 1, 1), date(2026, 1, 26), date(2026, 4, 3), date(2026, 4, 6),
     date(2026, 6, 8), date(2026, 12, 25), date(2026, 12, 28),

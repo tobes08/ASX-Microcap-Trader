@@ -43,11 +43,21 @@ def reset_session():
     _session = None
 
 
-def fetch_page(page, max_attempts=None):
-    """Fetch one page of the announcements feed. Returns a list of items, or
-    None if the page could not be retrieved."""
+def fetch_query(params, max_attempts=None):
+    """Run one query against the announcements feed.
+
+    Returns the payload's ``data`` dict, i.e. {"items": [...], "count": n},
+    or None if it could not be retrieved. ``count`` is the number of items
+    matching the query, capped by the feed at config.FEED_MAX_RESULT_WINDOW.
+
+    Besides ``page`` and ``itemsPerPage`` the feed honours (probed 15 Nov
+    2026) ``dateStart`` / ``dateEnd`` as inclusive Sydney calendar dates and
+    ``priceSensitiveOnly=true``. Parameters it does not know are ignored
+    silently, so a misspelt filter returns the unfiltered feed, not an error.
+    """
     max_attempts = max_attempts or config.MAX_FETCH_ATTEMPTS
-    params = {"page": page, "itemsPerPage": config.ITEMS_PER_PAGE}
+    label = " ".join(f"{k}={v}" for k, v in params.items()
+                     if k != "itemsPerPage")
 
     for attempt in range(1, max_attempts + 1):
         try:
@@ -55,21 +65,24 @@ def fetch_page(page, max_attempts=None):
                               timeout=config.HTTP_TIMEOUT)
             if r.status_code == 200:
                 payload = r.json()
-                items = (payload.get("data") or {}).get("items") or []
-                return items
+                data = payload.get("data") or {}
+                if not isinstance(data, dict):
+                    data = {}
+                data["items"] = data.get("items") or []
+                return data
             if r.status_code in (401, 403):
-                log.error("page=%s HTTP %s - the endpoint is rejecting us. "
+                log.error("%s HTTP %s - the endpoint is rejecting us. "
                           "Headers may need refreshing from a live browser "
-                          "session.", page, r.status_code)
+                          "session.", label, r.status_code)
             else:
-                log.warning("page=%s HTTP %s (attempt %s/%s)",
-                            page, r.status_code, attempt, max_attempts)
+                log.warning("%s HTTP %s (attempt %s/%s)",
+                            label, r.status_code, attempt, max_attempts)
         except requests.exceptions.RequestException as e:
-            log.warning("page=%s network error: %s (attempt %s/%s)",
-                        page, e, attempt, max_attempts)
-        except ValueError as e:
-            log.warning("page=%s bad JSON: %s (attempt %s/%s)",
-                        page, e, attempt, max_attempts)
+            log.warning("%s network error: %s (attempt %s/%s)",
+                        label, e, attempt, max_attempts)
+        except (ValueError, AttributeError) as e:
+            log.warning("%s bad JSON: %s (attempt %s/%s)",
+                        label, e, attempt, max_attempts)
 
         if attempt == max_attempts:
             break
@@ -77,6 +90,16 @@ def fetch_page(page, max_attempts=None):
 
     reset_session()
     return None
+
+
+def fetch_page(page, max_attempts=None):
+    """Fetch one page of the announcements feed. Returns a list of items, or
+    None if the page could not be retrieved."""
+    data = fetch_query({"page": page, "itemsPerPage": config.ITEMS_PER_PAGE},
+                       max_attempts)
+    if data is None:
+        return None
+    return data["items"]
 
 
 def pdf_url(doc_key):
