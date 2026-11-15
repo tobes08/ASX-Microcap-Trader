@@ -113,10 +113,13 @@ def daily_bars(ticker, start, end, attempts=3):
     frame = None
     for attempt in range(1, attempts + 1):
         try:
+            # No raise_errors argument: not raising is yfinance's default,
+            # and the argument itself is deprecated from 1.8 onwards. Passing
+            # it would turn its eventual removal into a TypeError here, i.e.
+            # a book that silently stops entering trades.
             frame = yf().Ticker(sym).history(
                 start=start.isoformat(), end=end.isoformat(),
-                interval="1d", auto_adjust=True, actions=False,
-                raise_errors=False)
+                interval="1d", auto_adjust=True, actions=False)
             break
         except Exception as e:
             log.warning("bars %s %s..%s failed (%s/%s): %s",
@@ -192,8 +195,7 @@ def benchmark_series(start_date, end_date):
             frame = yf().Ticker(sym).history(
                 start=start_date.isoformat(),
                 end=(end_date + _dt.timedelta(days=1)).isoformat(),
-                interval="1d", auto_adjust=True, actions=False,
-                raise_errors=False)
+                interval="1d", auto_adjust=True, actions=False)
         except Exception:
             continue
         if frame is None or not len(frame):

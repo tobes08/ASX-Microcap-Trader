@@ -48,6 +48,10 @@ def test_market_state():
         ("2026-06-05T06:05:00.000Z", "CLOSING_AUCTION", "open"),  # Fri 16:05
         ("2026-06-05T09:00:00.000Z", "AFTER_HOURS", "open"),     # Fri 19:00
         ("2026-06-06T02:00:00.000Z", "NON_TRADING_DAY", "open"),  # Saturday
+        # Daylight saving: Sydney is UTC+11 in November.
+        ("2026-11-12T22:55:16.000Z", "PRE_OPEN", "open"),        # Fri 09:55
+        ("2026-11-12T23:05:00.000Z", "OPENING_AUCTION", "close"),  # Fri 10:05
+        ("2026-11-13T05:05:00.000Z", "CLOSING_AUCTION", "open"),  # Fri 16:05
     ]
     bad = []
     for raw, want_state, want_field in cases:
@@ -100,6 +104,9 @@ def test_filter_rules():
          body_ok, cap_small, False, None),
         (rec("ABCD", "Significant Drilling Results"),
          body_ok, cap_small, False, None),
+        # Codes with digits are ordinary shares too (4DX, MA1, S32).
+        (rec("4DX", "Significant Drilling Results"),
+         body_ok, cap_small, True, "DRILLING_RESULTS"),
         (rec("ABC", "Some Routine Administrative Update"),
          body_ok, cap_small, False, None),
         (rec("ABC", "Significant Drilling Results"),
@@ -259,13 +266,11 @@ def test_pdf(items):
 
 
 def test_prices(items):
-    ticker = None
-    for item in (items or []):
-        sym = (item.get("symbol") or "").strip().upper()
-        if len(sym) == 3:
-            ticker = sym
-            break
-    ticker = ticker or "BHP"
+    # The plumbing check needs a ticker that must resolve. The newest feed
+    # item is not one: on 30 Aug 2026 it was ZOR, the ASX's own platform-test
+    # code, which no price source carries, and this test reported the market
+    # cap lookup as broken when nothing was wrong with it.
+    ticker = "BHP"
 
     cap = prices.market_cap(ticker)
     check("market cap lookup", PASS if cap else FAIL,
@@ -284,6 +289,41 @@ def test_prices(items):
     check("benchmark index", PASS if series else WARN,
           f"{sym}, {len(series)} sessions" if series else
           "no benchmark data - excess return will be blank")
+
+    test_market_cap_coverage(items)
+
+
+def test_market_cap_coverage(items, sample_size=6):
+    """Separate from the plumbing check above: of the companies announcing
+    right now, how many can be sized at all? An unresolved market cap is a
+    rejection, so poor coverage here starves the book however healthy the
+    lookup itself is."""
+    import re
+    pattern = re.compile(config.TICKER_PATTERN)
+    # Price-sensitive items first: those are the ones the filter will ask
+    # about, and the ASX's test entity never lodges one.
+    ranked = sorted(items or [],
+                    key=lambda it: not it.get("isPriceSensitive"))
+    sample = []
+    for item in ranked:
+        if not (item.get("isPriceSensitive") or item.get("companyInfo")):
+            continue
+        sym = (item.get("symbol") or "").strip().upper()
+        if pattern.match(sym) and sym not in sample:
+            sample.append(sym)
+        if len(sample) >= sample_size:
+            break
+    if not sample:
+        check("market cap coverage on live tickers", WARN,
+              "skipped, no suitable feed items")
+        return
+    missing = [t for t in sample if not prices.market_cap(t)]
+    resolved = len(sample) - len(missing)
+    detail = f"{resolved}/{len(sample)} feed tickers resolved"
+    if missing:
+        detail += f" (nothing for {', '.join(missing)})"
+    check("market cap coverage on live tickers",
+          PASS if resolved * 2 >= len(sample) else WARN, detail)
 
 
 def test_live_filter_sample(items):

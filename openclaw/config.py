@@ -68,9 +68,14 @@ REJECT_ON_UNKNOWN_MARKET_CAP = True
 # rejected, because failure to extract is not evidence of a thin document.
 MIN_BODY_CHARS = 400
 
-# ASX codes are 3 letters for ordinary shares. 4+ characters means options,
+# ASX codes are 3 characters for ordinary shares. 4+ characters means options,
 # warrants, notes, or an ETF class we do not trade.
-TICKER_PATTERN = r"^[A-Z]{3}$"
+#
+# Three characters, not three letters: newer listings carry digits (MA1, 4DX,
+# A1M, S32) and those skew small, which is exactly this universe. A
+# letters-only pattern was discarding them as "not ordinary shares": 1,053 of
+# 10,000 feed items in the three weeks to 14 Nov 2026, across 230 companies.
+TICKER_PATTERN = r"^[A-Z0-9]{3}$"
 
 # Tickers we never trade regardless of what they announce.
 TICKER_EXCLUSIONS = set()
