@@ -889,9 +889,16 @@ def build_report(events, meta, dedupe_events=True, prices=None,
         "what the filter is missing")
     add("  as well as what it trades. One trade per company per session "
         "within each type.")
-    universe = [e for e in events
-                if e["in_universe"] and e["sim"]
-                and not e["sim"]["void_reason"]]
+    add("  Entries on a session with no volume are left out of the returns "
+        "below. They are stale prices,")
+    add("  mostly halted stocks, and the 'reaction' is the market repricing "
+        "on resumption, which nobody can buy.")
+    add("  (Trading Halt looks like +4% at t+5 with them in, and +0.1% "
+        "without.) The share table counts everything.")
+    universe_all = [e for e in events
+                    if e["in_universe"] and e["sim"]
+                    and not e["sim"]["void_reason"]]
+    universe = [e for e in universe_all if e["sim"]["stress_fillable"]]
     by_native = defaultdict(list)
     for e in universe:
         for t in e["native_types"] or ["<none>"]:
@@ -918,13 +925,15 @@ def build_report(events, meta, dedupe_events=True, prices=None,
                       min_n=config.GATE_MIN_N))
 
     captured = Counter()
-    for e in universe:
+    for e in universe_all:
         for t in e["native_types"] or ["<none>"]:
             captured[(t, e["passed"])] += 1
+    common = sorted({t for t, _ in captured},
+                    key=lambda t: -(captured[(t, True)] + captured[(t, False)]))
     add("")
     add("  Share of each native type the live filter currently passes "
-        "(25 most common types):")
-    for t, evs in native_groups[:25]:
+        "(25 most common types, all entries):")
+    for t in common[:25]:
         n = captured[(t, True)] + captured[(t, False)]
         add(f"    {t[:44]:<45}{n:>6,}  passed "
             f"{100.0 * captured[(t, True)] / max(n, 1):5.1f}%")

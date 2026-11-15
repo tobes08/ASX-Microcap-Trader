@@ -390,6 +390,7 @@ class BuildEventsTests(unittest.TestCase):
             self.assertIn(section, text)
         self.assertIn("3 documents -> 2 after merging", text)
         self.assertIn("codes containing a digit: 1", text)
+        self.assertIn("Entries on a session with no volume are left out", text)
         # nothing reaches N of 30 on eight announcements
         self.assertIn("Cells passing the plan's gate: 0 of", text)
 
