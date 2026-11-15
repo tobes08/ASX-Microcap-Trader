@@ -17,11 +17,19 @@ setup.bat        once, installs dependencies
 selftest.bat     verifies the plumbing, writes to a scratch database
 run_openclaw.bat starts it, leave the window open, Ctrl+C stops it cleanly
 report.bat       prints the ledger, safe to run while it is running
+
+harvest.bat      Sprint 0.2.1: pull two years of announcement history
+study.bat        Sprint 0.2.2-0.2.6: the event study and the gate readout
+tests.bat        offline tests, no network
 ```
 
 Run `selftest.bat` first. If it reports a failure, do not leave the poller
 running: a failing market-cap lookup would reject every announcement, and a
 failing price feed would leave the book full of trades that never enter.
+
+`harvest.bat` and `study.bat` are separate from the poller. They use their own
+database and log file under `data/research/`, so they can run while the poller
+is running and cannot touch the live ledger.
 
 ---
 
@@ -132,6 +140,80 @@ is recorded as `VOID`, not as a loss.
 
 ---
 
+## Research: history and the 0.2.6 gate
+
+The forward book answers the question slowly, at the rate the market
+produces announcements. The event study answers it now, from history, using
+the same filter, the same entry rules, the same slippage tiers and the same
+benchmark, so the two can be compared like for like.
+
+```
+harvest.bat     about 3 minutes for 24 months, resumable
+study.bat       about 10 minutes the first time (price download), then seconds
+```
+
+**What the feed allows** (probed 15 Nov 2026). Plain paging stops at 10,000
+items, about three and a half weeks. The feed also takes `dateStart` and
+`dateEnd` (inclusive Sydney dates), `priceSensitiveOnly=true`, and up to 2,000
+items per page, and the date filter reaches back at least to 2010. So history
+is harvested in date windows, newest first, each small enough to sit under the
+cap. The harvester refuses to store a window if the feed ignores a filter
+(it silently ignores parameters it does not know), so a changed endpoint
+cannot fill the corpus with the live feed filed under old dates. It paces
+itself at one request every 2.5 seconds on purpose: the endpoint is
+unofficial and there is nothing to gain by going faster.
+
+**What the study does.**
+
+- Replays every price-sensitive announcement through `filters.evaluate`, the
+  same function the live poller uses. The PDF body-length check is skipped (it
+  would cost a download per candidate).
+- Reconstructs market cap as at the announcement: share count as reported at
+  the time, times the price actually quoted that day (split ratios unwound),
+  median of the five sessions before it. Today's share count would be wrong by
+  a multiple for companies that issue shares constantly. Checked against the
+  ASX's own company directory: median ratio 1.00, 98% within 25%.
+- Prices each trade by the shadow book's rules and checks it against the live
+  ledger code: `tests/test_eventstudy.py` runs the real `shadowbook.settle()`
+  and the study over the same prices and requires identical entry day, entry
+  price, exit days and returns.
+- Drops legs that cross a split Yahoo recorded but never applied to the older
+  prices (it happens: one name showed a 19,900% return from a 1-for-200
+  consolidation).
+
+**Reading the report** (`data/research/eventstudy_report.txt`, also printed).
+Start at READOUT, then the gate table.
+
+| Column | Meaning |
+|---|---|
+| `excess` | mean net return after the haircut on both sides, minus the benchmark |
+| `gross`, `w.gross` | the same before any cost, and with the top and bottom 5% clipped |
+| `t(g)` | clustered t-stat of gross excess: is there a price reaction at all |
+| `BE%` | the per-side cost that would bring mean excess to zero. Compare it with the 3.0% and 1.5% the book assumes. `<0` means the move does not beat the benchmark even for free |
+| `t(cl)` | t-stat of net excess, clustered by entry date |
+| `stress` | net excess with a half-tick cost floor and no fill on zero-volume sessions |
+| `H1`, `H2` | net excess in each half of the sample |
+| `gate` | `PASS` is the plan's wording (N >= 30, net excess > 0). `PASS*` also needs a positive median, clustered t >= 2, both halves positive, and positive under stress |
+
+The CONTROL section matters most when reading a negative result. For each real
+trade it enters the same stock on other pre-open mornings, 30 to 90 days
+either side (same season, holding windows clear of the announcement), under
+identical rules. The announcement effect is real minus placebo, paired per
+trade. Without it you cannot tell "the announcement does nothing" from "these
+stocks lag the benchmark anyway".
+
+**Limits, so they are not forgotten.** Daily bars cannot see the order book or
+anything inside a session, so this cannot test whether a fast reader beats
+retail to the price. Companies delisted since are missing from Yahoo, so
+results lean flattering. The haircut tiers are an assumption, not a
+measurement. Two years is one market regime. A cell tested among dozens will
+sometimes clear a gate by luck, which is what `PASS*` and the placebo are for.
+
+The harvested corpus is for private, personal research (ASX terms). It lives
+in `data/research/`, which is gitignored. Do not commit it or pass it on.
+
+---
+
 ## Files
 
 ```
@@ -148,6 +230,14 @@ openclaw/report.py     ledger report
 data/openclaw.sqlite   everything persistent
 data/raw/YYYY-MM-DD.jsonl  untouched feed JSON, append-only
 data/logs/openclaw.log rotating, 5MB x 5
+
+openclaw/harvest.py    Sprint 0.2.1 historical harvest
+openclaw/histstore.py  research database (corpus, price cache)
+openclaw/histprices.py cached history, point-in-time market cap, split checks
+openclaw/eventstudy.py Sprint 0.2.2-0.2.6 event study, control, gate
+tests/                 offline tests (tests.bat)
+data/research/         corpus, price cache, report, trades CSV (gitignored)
+data/logs/research.log research tools log, separate from the poller's
 ```
 
 `seen_keys.txt` from the 0.1 poller is imported into the database on first
@@ -166,6 +256,13 @@ Everything is in `openclaw/config.py`. The ones you will actually touch:
 - `NOTIONAL_PER_TRADE` - only affects the dollar columns
 - `POLL_INTERVAL_ACTIVE` - 60s during 07:00-19:00 Sydney weekdays,
   600s otherwise
+- `TICKER_PATTERN` - three characters, letters or digits (MA1, 4DX, S32 are
+  ordinary shares; a letters-only pattern discarded about 10% of announcements)
+
+The research tools read the same filter and slippage settings, so a change
+here shows up in the next `study.bat` run with no extra work. Their own knobs
+(harvest pacing, window sizes, liquidity bands, placebo settings, the gate's
+N) are in the Research section of `config.py`.
 
 After changing anything, run `selftest.bat` and restart.
 
